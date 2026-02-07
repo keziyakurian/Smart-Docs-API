@@ -1,0 +1,12 @@
+fastapi==0.109.2
+uvicorn==0.27.1
+python-multipart==0.0.9
+langchain==0.1.9
+langchain-community==0.0.24
+langchain-openai==0.0.7
+langchain-text-splitters==0.0.1
+pypdf==4.0.2
+chromadb==0.4.22
+python-dotenv==1.0.1
+tiktoken==0.6.0
+httpx==0.26.0
