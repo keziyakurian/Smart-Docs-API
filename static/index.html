@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Docs API - Portfolio Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .animate-pulse-subtle { animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row h-[85vh] border border-gray-100">
+        
+        <!-- Left Panel: Upload -->
+        <div class="w-full md:w-1/3 bg-gray-900 text-white p-6 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -mr-16 -mt-16 animate-pulse-subtle"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -ml-16 -mb-16 animate-pulse-subtle"></div>
+            
+            <div class="relative z-10">
+                <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200">Smart Docs API</h1>
+                <p class="text-sm text-gray-400 mt-2">AI-Powered Document Intelligence</p>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center items-center relative z-10">
+                <div id="upload-zone" class="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-gray-800 transition-all cursor-pointer group">
+                    <div class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    </div>
+                    <p class="text-sm font-medium">Click to Upload PDF</p>
+                    <p class="text-xs text-gray-500 mt-1">Maximum size 10MB</p>
+                    <input type="file" id="file-input" class="hidden" accept=".pdf">
+                </div>
+                <div id="upload-status" class="mt-4 text-xs font-mono hidden">
+                    <span class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
+                        Processing Vector Embeddings...
+                    </span>
+                </div>
+                <div id="file-info" class="mt-4 text-sm font-medium text-green-400 hidden">
+                    PDF Ready ✓
+                </div>
+            </div>
+
+            <div class="text-xs text-gray-600 text-center relative z-10">
+                Powered by FastAPI, LangChain & OpenAI
+            </div>
+        </div>
+
+        <!-- Right Panel: Chat -->
+        <div class="flex-1 flex flex-col bg-white">
+            <!-- Header -->
+            <div class="h-16 border-b flex items-center px-6 justify-between bg-white">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span class="font-semibold text-gray-700">Chat Session</span>
+                </div>
+                <button onclick="location.reload()" class="text-xs text-gray-400 hover:text-red-500 transition-colors">Clear Chat</button>
+            </div>
+
+            <!-- Messages -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 chat-scroll bg-gray-50">
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm max-w-[85%]">
+                        Hello! Upload a PDF document on the left, and I'll answer any questions about it using AI.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="p-4 bg-white border-t">
+                <form id="chat-form" class="flex gap-2">
+                    <input type="text" id="user-input" placeholder="Ask a question about your PDF..." 
+                        class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <button type="submit" id="send-btn" 
+                        class="px-5 py-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm flex items-center gap-2" disabled>
+                        <span>Send</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script>
+        const API_URL = "http://localhost:8000/api/v1";
+        const fileInput = document.getElementById('file-input');
+        const uploadZone = document.getElementById('upload-zone');
+        const uploadStatus = document.getElementById('upload-status');
+        const fileInfo = document.getElementById('file-info');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const messagesContainer = document.getElementById('chat-messages');
+
+        // Styles for messages
+        const styles = {
+            user: "bg-gray-900 text-white rounded-2xl rounded-tr-none ml-auto",
+            bot: "bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-none shadow-sm"
+        };
+
+        // Upload Logic
+        uploadZone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // UI Updates
+            uploadZone.classList.add('opacity-50', 'pointer-events-none');
+            uploadStatus.classList.remove('hidden');
+            uploadStatus.querySelector('span').innerHTML = `<span class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span> Uploading & Processing ${file.name}...`;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${API_URL}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Upload failed');
+                
+                const data = await response.json();
+                
+                // Success
+                uploadStatus.classList.add('hidden');
+                fileInfo.classList.remove('hidden');
+                fileInfo.innerText = "Active: " + file.name;
+                
+                // Enable Chat
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+                userInput.focus();
+                
+                addMessage("bot", `I've processed **${file.name}** (${data.chunks_count} chunks). Ask me anything!`);
+
+            } catch (err) {
+                uploadStatus.innerHTML = `<span class="text-red-400">Error: ${err.message}</span>`;
+                uploadZone.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        });
+
+        // Chat Logic
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const question = userInput.value.trim();
+            if (!question) return;
+
+            // Add User Message
+            addMessage("user", question);
+            userInput.value = '';
+            
+            // Loading State
+            const loadingId = addLoadingMessage();
+            
+            try {
+                const response = await fetch(`${API_URL}/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+                
+                // Remove Loading, Add Bot Response
+                removeMessage(loadingId);
+                addMessage("bot", data.answer);
+
+            } catch (err) {
+                removeMessage(loadingId);
+                addMessage("bot", "Sorry, I couldn't get an answer. Is the backend running?");
+            }
+        });
+
+        function addMessage(type, text) {
+            const div = document.createElement('div');
+            div.className = `flex gap-3 ${type === 'user' ? 'justify-end' : ''}`;
+            
+            const contentClass = type === 'user' ? styles.user : styles.bot;
+            
+            let iconHtml = '';
+            if (type === 'bot') {
+                iconHtml = `
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>`;
+            }
+
+            const html = `
+                ${type === 'bot' ? iconHtml : ''}
+                <div class="${contentClass} p-3 text-sm max-w-[85%] leading-relaxed">
+                    ${text}
+                </div>
+            `;
+
+            div.innerHTML = html;
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addLoadingMessage() {
+            const id = 'loading-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = "flex gap-3";
+            div.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
+                    <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </div>
+                <div class="bg-gray-50 border border-transparent rounded-2xl rounded-tl-none p-4 text-sm text-gray-500">
+                    Thinking...
+                </div>
+            `;
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return id;
+        }
+
+        function removeMessage(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+    </script>
+</body>
+</html>

@@ -8,8 +8,8 @@ from app.core.config import settings
 embeddings = OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY)
 
 # Initialize ChromaDB
-# Persist to disk so we don't lose data on restart
-PERSIST_DIRECTORY = "chroma_db"
+# Persist to /tmp so it works on Vercel (Ephemeral)
+PERSIST_DIRECTORY = "/tmp/chroma_db"
 
 def get_vector_store():
     vector_store = Chroma(
